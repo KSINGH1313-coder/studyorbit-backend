@@ -13,63 +13,103 @@ def generate_code():
 # 👉 Teacher Signup
 @auth.route("/teacher/signup", methods=["POST"])
 def teacher_signup():
-    data = request.json
+    try:
+        data = request.get_json()
 
-    import random, string
-    code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        if not data:
+            return jsonify({"message": "No data received"}), 400
 
-    teacher = {
-        "name": data["name"],
-        "email": data["email"],
-        "password": data["password"],
-        "role": "teacher",
-        "institute_code": code
-    }
+        # ✅ safe extraction
+        name = data.get("name")
+        email = data.get("email")
+        password = data.get("password")
 
-    db.users.insert_one(teacher)
+        if not name or not email or not password:
+            return jsonify({"message": "Missing fields"}), 400
 
-    return jsonify({
-        "message": "Teacher registered",
-        "institute_code": code
-    })
+        code = generate_code()
+
+        teacher = {
+            "name": name,
+            "email": email,
+            "password": password,
+            "role": "teacher",
+            "institute_code": code
+        }
+
+        db.users.insert_one(teacher)
+
+        return jsonify({
+            "message": "Teacher registered",
+            "institute_code": code
+        })
+
+    except Exception as e:
+        print("ERROR:", e)  # 🔥 important for logs
+        return jsonify({"message": "Server error"}), 500
+
 
 # 👉 Student Signup
 @auth.route("/student/signup", methods=["POST"])
 def student_signup():
-    data = request.json
+    try:
+        data = request.get_json()
 
-    student = {
-        "name": data["name"],
-        "email": data["email"],
-        "password": data["password"],
-        "role": "student",
-        "institute_code": data["instituteCode"]  # 🔥 important
-    }
+        if not data:
+            return jsonify({"message": "No data received"}), 400
 
-    db.users.insert_one(student)
+        name = data.get("name")
+        email = data.get("email")
+        password = data.get("password")
+        institute_code = data.get("instituteCode")
 
-    return jsonify({"message": "Student registered"})
-   
+        if not name or not email or not password or not institute_code:
+            return jsonify({"message": "Missing fields"}), 400
 
-# 👉 Login (common for both)
+        student = {
+            "name": name,
+            "email": email,
+            "password": password,
+            "role": "student",
+            "institute_code": institute_code
+        }
+
+        db.users.insert_one(student)
+
+        return jsonify({"message": "Student registered"})
+
+    except Exception as e:
+        print("ERROR:", e)
+        return jsonify({"message": "Server error"}), 500
+
+
+# 👉 Login
 @auth.route("/login", methods=["POST"])
 def login():
-    data = request.json
+    try:
+        data = request.get_json()
 
-    user = db.users.find_one({
-        "email": data["email"],
-        "password": data["password"]
-    })
+        if not data:
+            return jsonify({"message": "No data received"}), 400
 
-    if not user:
-        return jsonify({"message": "Invalid credentials"}), 401
+        user = db.users.find_one({
+            "email": data.get("email"),
+            "password": data.get("password")
+        })
 
-    return jsonify({
-        "message": "Login successful",
-        "user": {
-            "name": user["name"],
-            "email": user["email"],
-            "role": user["role"],
-            "institute_code": user["institute_code"]
-        }
-    })
+        if not user:
+            return jsonify({"message": "Invalid credentials"}), 401
+
+        return jsonify({
+            "message": "Login successful",
+            "user": {
+                "name": user["name"],
+                "email": user["email"],
+                "role": user["role"],
+                "institute_code": user.get("institute_code", "")
+            }
+        })
+
+    except Exception as e:
+        print("ERROR:", e)
+        return jsonify({"message": "Server error"}), 500

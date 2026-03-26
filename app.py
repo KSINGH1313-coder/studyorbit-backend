@@ -12,12 +12,14 @@ from routes.test_routes import test
 app = Flask(__name__)
 
 # 🔥 UPDATED CORS (fixed for Vercel)
-CORS(app, resources={r"/*": {
-    "origins": [
-        "http://localhost:5173",
-        "https://studyorbit-frontend.vercel.app"
-    ]
-}}, supports_credentials=True)
+CORS(app)
+
+@app.after_request
+def after_request(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization"
+    response.headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS"
+    return response
 
 # ✅ ADD THIS BLOCK (VERY IMPORTANT - DO NOT REMOVE)
 @app.after_request

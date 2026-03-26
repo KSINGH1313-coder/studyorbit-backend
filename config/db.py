@@ -1,4 +1,5 @@
 from pymongo import MongoClient
+import os
 
-client = MongoClient("mongodb://127.0.0.1:27017/")
-db = client["studyorbit_db"]
+client = MongoClient(os.environ.get("MONGO_URI"))
+db = client["studyorbit"]

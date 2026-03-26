@@ -14,12 +14,11 @@ def generate_code():
 @auth.route("/teacher/signup", methods=["POST"])
 def teacher_signup():
     try:
-        data = request.get_json()
+        data = request.get_json(force=True)
 
         if not data:
             return jsonify({"message": "No data received"}), 400
 
-        # ✅ safe extraction
         name = data.get("name")
         email = data.get("email")
         password = data.get("password")
@@ -37,6 +36,9 @@ def teacher_signup():
             "institute_code": code
         }
 
+        # 🔥 DEBUG PRINT
+        print("DATA RECEIVED:", teacher)
+
         db.users.insert_one(teacher)
 
         return jsonify({
@@ -45,8 +47,8 @@ def teacher_signup():
         })
 
     except Exception as e:
-        print("ERROR:", e)  # 🔥 important for logs
-        return jsonify({"message": "Server error"}), 500
+        print("🔥 ERROR:", str(e))   # VERY IMPORTANT
+        return jsonify({"message": str(e)}), 500
 
 
 # 👉 Student Signup

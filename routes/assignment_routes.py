@@ -71,12 +71,12 @@ def submit():
 
 @assignment.route("/submissions/<batch_id>/<title>", methods=["GET"])
 def get_submissions(batch_id, title):
-    data = list(db.submissions.find(
-        {
-            "batch_id": batch_id,
-            "assignment_title": title
-        },
-        {"_id": 0}
-    ))
+    subs = list(db.submissions.find({
+        "batch_id": batch_id,
+        "assignment_title": title
+    }))
 
-    return jsonify(data)
+    for s in subs:
+        s["_id"] = str(s["_id"])
+
+    return jsonify(subs)

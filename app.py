@@ -11,7 +11,7 @@ from routes.test_routes import test
 app = Flask(__name__)
 
 # 🔥 IMPORTANT FIX
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 # register routes
 app.register_blueprint(auth, url_prefix="/api")
